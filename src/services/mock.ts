@@ -107,7 +107,7 @@ export function generarLecturas(horas: number, pasoMin = 15, semillaBase = 1): L
 export function generarUltimaLectura(invernaderoId: string): Lectura {
   const semilla = invernaderoId.charCodeAt(invernaderoId.length - 1);
   const lecturas = generarLecturas(2, 15, semilla);
-  return lecturas[lecturas.length - 1];
+  return lecturas[lecturas.length - 1]!;
 }
 
 const horasAtras = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
