@@ -25,7 +25,7 @@ export function SelectorInvernadero({ invernaderos, seleccionado, onCambio, enVi
   return (
     <div className="flex flex-wrap items-center gap-3">
       {invernaderos.length > 1 && (
-        <Select value={seleccionado} onValueChange={onCambio}>
+        <Select value={seleccionado ?? ""} onValueChange={onCambio}>
           <SelectTrigger className="w-full sm:w-64" aria-label="Invernadero">
             <SelectValue placeholder="Elegí un invernadero" />
           </SelectTrigger>
