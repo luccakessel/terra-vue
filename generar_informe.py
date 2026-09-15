@@ -17,7 +17,7 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
 TMP = r"C:\Users\Lucca\AppData\Local\Temp\opencode"
-OUT = r"C:\Users\Lucca\Downloads\terra-vue-main\Informe_GreenSense_Taller_de_Integracion_v4.docx"
+OUT = r"C:\Users\Lucca\Downloads\terra-vue-main\Informe_GreenSense_Taller_de_Integracion_v5.docx"
 
 VERDE = "#15803d"
 VERDE_CLARO = "#dcfce7"
@@ -689,11 +689,13 @@ def main():
                  "propio (que aplica cache de 60 s y fallback ante indisponibilidad) y este consume la "
                  "API externa del Laboratorio Gugler, sin exponer la estación directamente al navegador.")
     parrafo(doc, "En cambio, en el despliegue público (Vercel) — donde no hay backend PHP — el widget "
-                 "consulta la EMA Center API directamente desde el navegador: la API responde con "
-                 "Access-Control-Allow-Origin: *, por lo que el panel muestra igualmente los datos "
-                 "meteorológicos reales de la estación. Solo se cambia la capa de origen de datos "
-                 "(fetch directo con CORS en modo demo/despliegue estático vs. proxy con cache en "
-                 "modo real), manteniendo el mismo modelo de tipos en el frontend.")
+                 "consulta la EMA Center API a través de una función serverless nativa de TanStack Start "
+                 "(src/server/climaEMA.ts). La consulta ocurre en el servidor (λ de Vercel), evitando el "
+                 "bloqueo por CORS que la API externa impone al navegador, y se cachea 60 segundos en "
+                 "memoria dentro del mismo runtime con timeout de 8 segundos. Si la API no responde, la "
+                 "función lanza un error que el widget muestra como estado de indisponibilidad con opción "
+                 "de reintentar, manteniendo así el mismo comportamiento y el mismo modelo de tipos "
+                 "ContextoClimatico en ambas capas de datos.")
 
     # 6
     doc.add_heading("6. Manejo de la Información y Modelado de Datos", level=1)

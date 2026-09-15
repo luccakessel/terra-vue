@@ -19,6 +19,7 @@
 
 import axios, { type AxiosInstance } from "axios";
 
+import { climaEma } from "@/server/climaEMA";
 import type {
   Alerta,
   Configuracion,
@@ -200,13 +201,13 @@ export const api = {
 
   /**
    * GET /api/contexto-climatico — clima externo de la estación EMA Center.
-   * En modo demo consulta la API pública directamente desde el navegador
-   * (CORS habilitado). En modo real usa el backend, que aplica cache y
-   * fallback por si la API externa no responde.
+   * En modo demo usa la función serverless `climaEma` (corre en el servidor,
+   * sin problemas de CORS y con cache de 60 s). En modo real usa el backend
+   * PHP, que aplica su propio cache y fallback.
    */
   async obtenerContextoClimatico(): Promise<ContextoClimatico | null> {
     if (USAR_MOCK) {
-      return consultarEmaDirecto();
+      return climaEma();
     }
     const { data } = await http.get<ContextoClimatico>("/contexto-climatico");
     return data;
@@ -218,70 +219,3 @@ export const api = {
     return `${API_URL}/api/reportes/${tipo}?${params.toString()}`;
   },
 };
-
-/** URL pública de la estación de la EMA Center API (Lab. Gugler). */
-const EMA_URL = import.meta.env["VITE_EMA_URL"] ?? "https://emacenter.gugler.com.ar/api/station/1/";
-
-/**
- * Consulta la EMA Center API directamente desde el navegador (la API pública
- * responde con CORS `*`). Usado en modo demo para mostrar datos meteorológicos
- * reales de la estación sin depender de un backend desplegado.
- */
-async function consultarEmaDirecto(): Promise<ContextoClimatico> {
-  const respuesta = await fetch(EMA_URL, { headers: { Accept: "application/json" } });
-  if (!respuesta.ok) {
-    throw new Error(`La EMA Center API respondió ${respuesta.status}.`);
-  }
-  const raw: {
-    id_estacion: number;
-    nombre?: string;
-    modelo?: string;
-    ciudad?: string;
-    latitud?: string;
-    longitud?: string;
-    registros?: Array<{
-      fecha?: string;
-      temperatura_externa?: number;
-      humedad_externa?: number;
-      punto_de_rocio?: number;
-      luxer_intencidad?: number;
-      luxer_uv?: number;
-      viento_velocidad?: number;
-      viento_rafagas?: number;
-      viento_direccion_nombre?: string;
-      presion_relativa?: number;
-      lluvia_acumulado_hora?: number;
-      lluvia_acumulado_diario?: number;
-    }>;
-  } = await respuesta.json();
-  const r = raw.registros?.[0];
-  if (!r) {
-    throw new Error("La EMA Center API no devolvió registros.");
-  }
-  const numero = (v: number | undefined): number => (typeof v === "number" ? v : 0);
-  return {
-    estacion: {
-      id: raw.id_estacion,
-      nombre: raw.nombre ?? "",
-      modelo: raw.modelo ?? "",
-      ciudad: raw.ciudad ?? "",
-      latitud: raw.latitud ?? "",
-      longitud: raw.longitud ?? "",
-    },
-    registro: {
-      fecha: r.fecha ?? "",
-      temperaturaExterna: numero(r.temperatura_externa),
-      humedadExterna: numero(r.humedad_externa),
-      puntoDeRocio: numero(r.punto_de_rocio),
-      luz: numero(r.luxer_intencidad),
-      uv: numero(r.luxer_uv),
-      vientoVelocidad: numero(r.viento_velocidad),
-      vientoRafagas: numero(r.viento_rafagas),
-      vientoDireccion: r.viento_direccion_nombre ?? "",
-      presionRelativa: numero(r.presion_relativa),
-      lluviaHora: numero(r.lluvia_acumulado_hora),
-      lluviaDiaria: numero(r.lluvia_acumulado_diario),
-    },
-    obtenidoEn: new Date().toISOString(),
-  };
-}

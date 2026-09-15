@@ -113,23 +113,25 @@ VITE_API_URL=http://localhost:3000
 VITE_WS_URL=http://localhost:3001
 
 # URL pública de la estación de la EMA Center API (Laboratorio Gugler).
-# Opcional: se usa en modo demo para traer el clima externo real desde el navegador
-# (la API pública responde con CORS habilitado para cualquier origen).
+# Opcional: se usa en modo demo para traer el clima externo real. La consulta
+# se hace desde una función serverless (TanStack Start) en el servidor (λ),
+# con cache de 60 s, evitando el CORS del navegador.
 VITE_EMA_URL=https://emacenter.gugler.com.ar/api/station/1/
 
 # Activar modo demo (sin backend real).
 # true  → datos simulados con curva día/noche; el WebSocket es un intervalo local.
-#         El widget de clima consulta EMA Center directamente (datos reales).
+#         El widget de clima consulta EMA Center desde una función serverless (datos reales).
 # false → se consumen los endpoints reales definidos en VITE_API_URL.
 VITE_USE_MOCK=true
 ```
 
 > **Modo demo (por defecto):** con `VITE_USE_MOCK=true` la app funciona completamente sin backend.
 > Se generan datos realistas de 3 invernaderos de ejemplo, incluyendo alertas y estados de riego.
-> El widget **Clima externo** consulta la **EMA Center API** del Laboratorio Gugler directamente
-> desde el navegador (CORS `*`), mostrando datos meteorológicos reales de la estación
-> Aramburu_Centro (Paraná). Para pasar al backend real, cambiar `VITE_USE_MOCK=false` y apuntar
-> `VITE_API_URL` al servidor: ahí el clima pasa a servirse con cache de 60 s por `EmaCenter`.
+> El widget **Clima externo** consulta la **EMA Center API** del Laboratorio Gugler a través de una
+> **función serverless** (server function de TanStack Start, corre en el λ de Vercel / dev server),
+> evitando el bloqueo por CORS y aplicando cache de 60 s, mostrando datos meteorológicos reales de
+> la estación Aramburu_Centro (Paraná). Para pasar al backend real, cambiar `VITE_USE_MOCK=false` y
+> apuntar `VITE_API_URL` al servidor: ahí el clima pasa a servirse con cache de 60 s por `EmaCenter`.
 
 ## ⚙️ Backend
 
