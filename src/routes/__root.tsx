@@ -84,7 +84,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "GreenSense" },
       { property: "og:title", content: "GreenSense — Monitoreo de invernaderos" },
-      { property: "og:description", content: "Monitoreo inteligente de invernaderos en tiempo real." },
+      {
+        property: "og:description",
+        content: "Monitoreo inteligente de invernaderos en tiempo real.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -92,6 +95,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        type: "image/svg+xml",
+        href: "/favicon.svg",
       },
     ],
   }),
