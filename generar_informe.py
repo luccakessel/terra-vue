@@ -17,7 +17,7 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
 TMP = r"C:\Users\Lucca\AppData\Local\Temp\opencode"
-OUT = r"C:\Users\Lucca\Downloads\terra-vue-main\Informe_GreenSense_Taller_de_Integracion_v3.docx"
+OUT = r"C:\Users\Lucca\Downloads\terra-vue-main\Informe_GreenSense_Taller_de_Integracion_v4.docx"
 
 VERDE = "#15803d"
 VERDE_CLARO = "#dcfce7"
@@ -685,9 +685,15 @@ def main():
                  "enriquece el monitoreo interno (sensores del invernadero) con el clima externo, clave "
                  "para decisiones de ventilación, protección ante heladas u olas de calor.")
     doc.add_picture(rutas["seclima"], width=IMG)
-    parrafo(doc, "Figura: flujo del widget Clima externo. El panel consulta el backend propio (que "
-                 "aplica cache de 60 s y fallback ante indisponibilidad) y este consume la API externa "
-                 "del Laboratorio Gugler, sin exponer la estación directamente al navegador.")
+    parrafo(doc, "Figura: flujo del widget Clima externo en producción. El panel consulta el backend "
+                 "propio (que aplica cache de 60 s y fallback ante indisponibilidad) y este consume la "
+                 "API externa del Laboratorio Gugler, sin exponer la estación directamente al navegador.")
+    parrafo(doc, "En cambio, en el despliegue público (Vercel) — donde no hay backend PHP — el widget "
+                 "consulta la EMA Center API directamente desde el navegador: la API responde con "
+                 "Access-Control-Allow-Origin: *, por lo que el panel muestra igualmente los datos "
+                 "meteorológicos reales de la estación. Solo se cambia la capa de origen de datos "
+                 "(fetch directo con CORS en modo demo/despliegue estático vs. proxy con cache en "
+                 "modo real), manteniendo el mismo modelo de tipos en el frontend.")
 
     # 6
     doc.add_heading("6. Manejo de la Información y Modelado de Datos", level=1)

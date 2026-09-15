@@ -41,6 +41,7 @@ src/
 │   ├── TarjetaSensor.tsx   # Tarjeta de estado de un sensor
 │   ├── GraficoLecturas.tsx # Gráfico de líneas (Recharts)
 │   ├── PanelRiego.tsx      # Estado y control del riego
+│   ├── PanelClima.tsx      # Widget de clima externo (EMA Center API)
 │   ├── TablaAlertas.tsx    # Tabla de alertas generadas
 │   ├── SelectorInvernadero.tsx
 │   └── EstadoCarga.tsx     # Skeletons y mensajes de error
@@ -111,15 +112,24 @@ VITE_API_URL=http://localhost:3000
 # No incluir barra final.
 VITE_WS_URL=http://localhost:3001
 
+# URL pública de la estación de la EMA Center API (Laboratorio Gugler).
+# Opcional: se usa en modo demo para traer el clima externo real desde el navegador
+# (la API pública responde con CORS habilitado para cualquier origen).
+VITE_EMA_URL=https://emacenter.gugler.com.ar/api/station/1/
+
 # Activar modo demo (sin backend real).
 # true  → datos simulados con curva día/noche; el WebSocket es un intervalo local.
+#         El widget de clima consulta EMA Center directamente (datos reales).
 # false → se consumen los endpoints reales definidos en VITE_API_URL.
 VITE_USE_MOCK=true
 ```
 
 > **Modo demo (por defecto):** con `VITE_USE_MOCK=true` la app funciona completamente sin backend.
 > Se generan datos realistas de 3 invernaderos de ejemplo, incluyendo alertas y estados de riego.
-> Para pasar al backend real, basta con cambiar `VITE_USE_MOCK=false` y apuntar `VITE_API_URL` al servidor.
+> El widget **Clima externo** consulta la **EMA Center API** del Laboratorio Gugler directamente
+> desde el navegador (CORS `*`), mostrando datos meteorológicos reales de la estación
+> Aramburu_Centro (Paraná). Para pasar al backend real, cambiar `VITE_USE_MOCK=false` y apuntar
+> `VITE_API_URL` al servidor: ahí el clima pasa a servirse con cache de 60 s por `EmaCenter`.
 
 ## ⚙️ Backend
 
@@ -168,6 +178,7 @@ Todos los endpoints se implementan en `src/services/api.ts`. Cuando el backend e
 | `GET` | `/api/invernaderos/:id/configuracion` | Umbrales y horarios configurados |
 | `PUT` | `/api/invernaderos/:id/configuracion` | Guardar configuración |
 | `GET` | `/api/reportes/:tipo?formato=csv\|excel&desde=&hasta=` | URL de descarga de reporte |
+| `GET` | `/api/contexto-climatico` | Clima externo de la estación EMA Center (cache 60 s) |
 
 **WebSocket:** `${VITE_WS_URL}/lecturas` (por defecto `${VITE_API_URL}/ws/lecturas`)  
 Evento recibido: `nueva_lectura` → `{ invernaderoId, sensor, valor, timestamp }`
