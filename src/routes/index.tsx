@@ -10,6 +10,7 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Cargando, ErrorConexion, SinDatos } from "@/components/EstadoCarga";
 import { GraficoLecturas } from "@/components/GraficoLecturas";
+import { PanelClima } from "@/components/PanelClima";
 import { PanelRiego } from "@/components/PanelRiego";
 import { SelectorInvernadero } from "@/components/SelectorInvernadero";
 import { TablaAlertas } from "@/components/TablaAlertas";
@@ -80,7 +81,10 @@ function Dashboard() {
           />
 
           {/* Tarjetas de estado actual */}
-          <section aria-label="Estado actual de sensores" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <section
+            aria-label="Estado actual de sensores"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          >
             {SENSORES.map((s) => (
               <TarjetaSensor
                 key={s.id}
@@ -92,7 +96,10 @@ function Dashboard() {
           </section>
 
           {/* Histórico */}
-          <section className="rounded-2xl border border-border bg-card p-5" aria-label="Histórico de lecturas">
+          <section
+            className="rounded-2xl border border-border bg-card p-5"
+            aria-label="Histórico de lecturas"
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-lg font-semibold">Evolución de las variables</h2>
               <div className="flex gap-1.5" role="group" aria-label="Rango temporal">
@@ -144,7 +151,12 @@ function Dashboard() {
               </div>
             </section>
 
-            {seleccionado && <PanelRiego invernaderoId={seleccionado} />}
+            {seleccionado && (
+              <div className="space-y-6">
+                <PanelRiego invernaderoId={seleccionado} />
+                <PanelClima />
+              </div>
+            )}
           </div>
         </div>
       )}

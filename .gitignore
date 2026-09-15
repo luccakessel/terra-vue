@@ -15,6 +15,11 @@ dist-ssr
 .tanstack/**
 .nitro
 *.local
+.env
+
+# Backend PHP: dependencias y datos locales (se regeneran)
+backend/vendor/
+backend/var/
 
 # Wrangler / Cloudflare
 .wrangler/

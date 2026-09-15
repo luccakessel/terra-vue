@@ -78,3 +78,36 @@ export type RangoTemporal = "24h" | "7d" | "30d";
 export type TipoReporte = "riego" | "consumo" | "alertas";
 
 export type FormatoReporte = "csv" | "excel";
+
+/** Estación meteorológica externa (EMA Center / Lab. Gugler). */
+export interface EstacionMeteorologica {
+  id: number;
+  nombre: string;
+  modelo: string;
+  ciudad: string;
+  latitud: string;
+  longitud: string;
+}
+
+/** Último registro meteorológico de la estación. */
+export interface RegistroMeteorologico {
+  fecha: string; // ISO 8601
+  temperaturaExterna: number; // °C
+  humedadExterna: number; // %
+  puntoDeRocio: number; // °C
+  luz: number; // lux
+  uv: number; // índice
+  vientoVelocidad: number; // m/s
+  vientoRafagas: number; // m/s
+  vientoDireccion: string; // punto cardinal
+  presionRelativa: number; // hPa
+  lluviaHora: number; // mm
+  lluviaDiaria: number; // mm
+}
+
+/** Contexto climático externo del invernadero (widget EMA Center). */
+export interface ContextoClimatico {
+  estacion: EstacionMeteorologica;
+  registro: RegistroMeteorologico;
+  obtenidoEn: string; // ISO 8601
+}

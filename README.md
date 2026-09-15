@@ -107,6 +107,10 @@ Crear un archivo `.env` en la raíz del proyecto con las siguientes variables:
 # No incluir barra final.
 VITE_API_URL=http://localhost:3000
 
+# URL del relay WebSocket (Node, puerto 3001) si se usa backend real.
+# No incluir barra final.
+VITE_WS_URL=http://localhost:3001
+
 # Activar modo demo (sin backend real).
 # true  → datos simulados con curva día/noche; el WebSocket es un intervalo local.
 # false → se consumen los endpoints reales definidos en VITE_API_URL.
@@ -116,6 +120,35 @@ VITE_USE_MOCK=true
 > **Modo demo (por defecto):** con `VITE_USE_MOCK=true` la app funciona completamente sin backend.
 > Se generan datos realistas de 3 invernaderos de ejemplo, incluyendo alertas y estados de riego.
 > Para pasar al backend real, basta con cambiar `VITE_USE_MOCK=false` y apuntar `VITE_API_URL` al servidor.
+
+## ⚙️ Backend
+
+El backend live se encuentra en `backend/` y es un proyecto **PHP 8 orientado a objetos**
+con Composer (autoload por classmap), base SQLite en `backend/var/` y un relay WebSocket en Node:
+
+```powershell
+# 1) Instalar dependencias (una vez)
+cd backend
+composer install        # genera vendor/autoload.php
+
+# 2) Backend REST (puerto 3000); crea y siembra la base al primer arranque
+php -S 0.0.0.0:3000 -t public
+
+# 3) Relay WebSocket (puerto 3001, lecturas en vivo) — en otra terminal
+node relay/socket-relay.mjs
+```
+
+Arquitectura (16 archivos bajo `backend/src/`):
+
+```
+src/Dominio/      # Entidades puras: Lectura, Invernadero, Alerta, Configuracion,
+                  #   Umbral/HorarioRiego, EstadoRiego y Tipos (SensorId, NivelAlerta)
+src/Persistencia/ # Conexion (singleton + esquema + seed), Repositorio (base) y Repositorios
+src/Servicios/    # Casos de uso: Autenticacion, Simulador, Riego y Alertas (patrón Strategy)
+src/Http/         # Router (front controller + auth Bearer) y Respuesta (JSON/CORS/descargas)
+```
+
+Credenciales de prueba: `productor@greensense.ar` / `demo1234`.
 
 ---
 
@@ -136,7 +169,7 @@ Todos los endpoints se implementan en `src/services/api.ts`. Cuando el backend e
 | `PUT` | `/api/invernaderos/:id/configuracion` | Guardar configuración |
 | `GET` | `/api/reportes/:tipo?formato=csv\|excel&desde=&hasta=` | URL de descarga de reporte |
 
-**WebSocket:** `${VITE_API_URL}/ws/lecturas`  
+**WebSocket:** `${VITE_WS_URL}/lecturas` (por defecto `${VITE_API_URL}/ws/lecturas`)  
 Evento recibido: `nueva_lectura` → `{ invernaderoId, sensor, valor, timestamp }`
 
 ---

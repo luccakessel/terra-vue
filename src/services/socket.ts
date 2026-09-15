@@ -1,7 +1,8 @@
 /**
  * Conexión WebSocket (socket.io) para lecturas en tiempo real.
  *
- * Namespace real: `${VITE_API_URL}/ws/lecturas`, evento `nueva_lectura`.
+ * Namespace real: `${VITE_WS_URL}/ws/lecturas`, evento `nueva_lectura`.
+ * Sin VITE_WS_URL se usa la API_URL (mismo host, /ws/lecturas).
  * Con VITE_USE_MOCK activo se simula el stream con un intervalo local, así el
  * dashboard se ve "vivo" sin backend.
  */
@@ -20,6 +21,8 @@ export interface SuscripcionLecturas {
 }
 
 const SENSORES: SensorId[] = ["humedadSuelo", "temperatura", "humedadAmbiente", "luz"];
+
+export const WS_URL = import.meta.env["VITE_WS_URL"] ?? (USAR_MOCK ? "" : `${API_URL}/ws`);
 
 /**
  * Suscribe a las lecturas en vivo de un invernadero.
@@ -56,7 +59,7 @@ export function suscribirLecturas(
     };
   }
 
-  const socket: Socket = io(`${API_URL}/ws/lecturas`, {
+  const socket: Socket = io(`${WS_URL}/lecturas`, {
     transports: ["websocket"],
     query: { invernaderoId },
   });

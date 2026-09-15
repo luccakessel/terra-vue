@@ -22,6 +22,7 @@ import axios, { type AxiosInstance } from "axios";
 import type {
   Alerta,
   Configuracion,
+  ContextoClimatico,
   EstadoRiego,
   FormatoReporte,
   Invernadero,
@@ -70,7 +71,10 @@ export function mensajeDeError(error: unknown): string {
     if (error.code === "ECONNABORTED") return "El invernadero no respondió en tiempo (timeout).";
     if (!error.response) return "Sin conexión con el servidor. Verificá la red del invernadero.";
     if (error.response.status === 401) return "Sesión expirada. Volvé a iniciar sesión.";
-    return (error.response.data as { mensaje?: string })?.mensaje ?? `Error ${error.response.status} del servidor.`;
+    return (
+      (error.response.data as { mensaje?: string })?.mensaje ??
+      `Error ${error.response.status} del servidor.`
+    );
   }
   return error instanceof Error ? error.message : "Error inesperado.";
 }
@@ -165,7 +169,9 @@ export const api = {
         ultimoRiego: activar ? new Date().toISOString() : base.ultimoRiego,
       };
     }
-    const { data } = await http.post<EstadoRiego>(`/invernaderos/${invernaderoId}/riego`, { activar });
+    const { data } = await http.post<EstadoRiego>(`/invernaderos/${invernaderoId}/riego`, {
+      activar,
+    });
     return data;
   },
 
@@ -189,6 +195,18 @@ export const api = {
       `/invernaderos/${config.invernaderoId}/configuracion`,
       config,
     );
+    return data;
+  },
+
+  /**
+   * GET /api/contexto-climatico — clima externo de la estación EMA Center.
+   * En modo demo devuelve null (el widget se oculta).
+   */
+  async obtenerContextoClimatico(): Promise<ContextoClimatico | null> {
+    if (USAR_MOCK) {
+      return null;
+    }
+    const { data } = await http.get<ContextoClimatico>("/contexto-climatico");
     return data;
   },
 

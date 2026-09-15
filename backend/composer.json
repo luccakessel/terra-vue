@@ -1,0 +1,19 @@
+{
+    "name": "greensense/backend",
+    "description": "Backend orientado a objetos del sistema GreenSense (Taller de Integracion - Analista de Sistemas)",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "ext-openssl": "*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

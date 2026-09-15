@@ -16,7 +16,7 @@ interface Props {
   seleccionado: string | undefined;
   onCambio: (id: string) => void;
   /** Estado del stream en vivo (WebSocket). */
-  enVivo?: boolean;
+  enVivo?: boolean | undefined;
 }
 
 export function SelectorInvernadero({ invernaderos, seleccionado, onCambio, enVivo }: Props) {
@@ -52,7 +52,11 @@ export function SelectorInvernadero({ invernaderos, seleccionado, onCambio, enVi
             enVivo ? "bg-ok/15 text-ok" : "bg-crit/15 text-crit"
           }`}
         >
-          {enVivo ? <Wifi className="size-3.5" aria-hidden /> : <WifiOff className="size-3.5" aria-hidden />}
+          {enVivo ? (
+            <Wifi className="size-3.5" aria-hidden />
+          ) : (
+            <WifiOff className="size-3.5" aria-hidden />
+          )}
           {enVivo ? "En vivo" : "Sin conexión en vivo"}
         </span>
       )}
