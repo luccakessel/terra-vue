@@ -9,6 +9,7 @@ import { MessageCircle, Send, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 interface Mensaje {
@@ -145,6 +146,8 @@ const respuestaGenerica =
   "Todavía no tengo información sobre ese tema. Podés consultarme sobre la cantidad de invernaderos, la configuración de alertas, los rangos ideales de temperatura y humedad, el riego, o el estado general del sistema.";
 
 export function ChatWidget() {
+  const { autenticado } = useAuth();
+
   const identidad = useRef(1);
   const [abierto, setAbierto] = useState(false);
   const [mensajes, setMensajes] = useState<Mensaje[]>([saludo]);
@@ -175,6 +178,9 @@ export function ChatWidget() {
     responder(texto);
     setBorrador("");
   }
+
+  // Solo disponible dentro del sistema, tras iniciar sesión.
+  if (!autenticado) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
