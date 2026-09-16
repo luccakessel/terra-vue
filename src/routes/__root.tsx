@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import { AuthProvider } from "@/context/AuthContext";
+import { ChatWidget } from "@/components/ChatWidget";
 
 import appCss from "../styles.css?url";
 
@@ -134,6 +135,8 @@ function RootComponent() {
         <Outlet />
         {/* Toaster de Sonner para notificaciones de éxito / error en toda la app. */}
         <Toaster richColors position="top-right" />
+        {/* Widget de chat flotante disponible en toda la app. */}
+        <ChatWidget />
       </AuthProvider>
     </QueryClientProvider>
   );
