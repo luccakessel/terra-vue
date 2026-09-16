@@ -220,3 +220,5 @@ bun run preview
 ---
 
 *Proyecto académico — Trabajo Final de Integración, Carrera Analista de Sistemas.*
+
+<!-- proyecto configurador y listo para desarollo cooperativo -->
