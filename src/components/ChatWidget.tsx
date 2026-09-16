@@ -1,12 +1,15 @@
 /**
  * Widget de chat flotante (abajo a la derecha): botón de apertura,
- * panel con historial, preguntas rápidas y respuestas del asistente
- * basadas en una base de conocimiento de GreenSense.
+ * panel con historial, preguntas rápidas y respuestas del asistente.
+ * Las respuestas las genera la IA (Groq, server fn) con la base de
+ * conocimiento de GreenSense como contexto; ante fallos usa el matcher
+ * local como respaldo.
  */
 
 import { useRef, useState, type FormEvent } from "react";
 import { MessageCircle, Send, X } from "lucide-react";
 
+import { responderChatIA, type MensajeChat } from "@/server/chatIA";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -155,13 +158,37 @@ export function ChatWidget() {
     return { id: identidad.current, texto, propio };
   }
 
-  function responder(consulta: string) {
+  /** Respuesta de respaldo cuando la IA no está disponible. */
+  function fallback(consulta: string): string {
     const tema = temaParaConsulta(consulta);
-    setMensajes((previos) => [
-      ...previos,
-      nuevoMensaje(consulta, true),
-      nuevoMensaje(tema ? tema.respuesta : respuestaGenerica, false),
-    ]);
+    return tema ? tema.respuesta : respuestaGenerica;
+  }
+
+  function reemplazarPendiente(id: number, texto: string) {
+    setMensajes((previos) =>
+      previos.map((mensaje) => (mensaje.id === id ? { ...mensaje, texto } : mensaje)),
+    );
+  }
+
+  function responder(consulta: string) {
+    const historial: MensajeChat[] = mensajes
+      .filter((mensaje) => mensaje.id !== saludo.id)
+      .map((mensaje) => ({
+        rol: mensaje.propio ? "usuario" : "asistente",
+        contenido: mensaje.texto,
+      }));
+
+    const usuario = nuevoMensaje(consulta, true);
+    const pendiente = nuevoMensaje("Escribiendo…", false);
+    setMensajes((previos) => [...previos, usuario, pendiente]);
+
+    void responderChatIA({ data: { pregunta: consulta, historial } })
+      .then((resultado) => {
+        const texto =
+          resultado.ok && resultado.respuesta ? resultado.respuesta : fallback(consulta);
+        reemplazarPendiente(pendiente.id, texto);
+      })
+      .catch(() => reemplazarPendiente(pendiente.id, fallback(consulta)));
   }
 
   function enviar(evento: FormEvent) {
@@ -228,10 +255,7 @@ export function ChatWidget() {
             ))}
           </div>
 
-          <form
-            onSubmit={enviar}
-            className="flex items-center gap-2 border-t border-border p-3"
-          >
+          <form onSubmit={enviar} className="flex items-center gap-2 border-t border-border p-3">
             <Input
               value={borrador}
               onChange={(evento) => setBorrador(evento.target.value)}
@@ -250,7 +274,11 @@ export function ChatWidget() {
         className="size-14 rounded-full shadow-lg"
         aria-label={abierto ? "Cerrar chat" : "Abrir chat"}
       >
-        {abierto ? <X className="size-6" aria-hidden /> : <MessageCircle className="size-6" aria-hidden />}
+        {abierto ? (
+          <X className="size-6" aria-hidden />
+        ) : (
+          <MessageCircle className="size-6" aria-hidden />
+        )}
       </Button>
     </div>
   );

@@ -133,6 +133,13 @@ VITE_USE_MOCK=true
 > la estación Aramburu_Centro (Paraná). Para pasar al backend real, cambiar `VITE_USE_MOCK=false` y
 > apuntar `VITE_API_URL` al servidor: ahí el clima pasa a servirse con cache de 60 s por `EmaCenter`.
 
+> **Chat con IA (Groq):** el asistente flotante responde con el modelo `openai/gpt-oss-120b`
+> (tier gratis de Groq, ~30 req/min y 1.000 req/día) usando la base de conocimiento de GreenSense
+> como contexto. La clave **`GROQ_API_KEY`** se configura como variable de entorno **solo de servidor**
+> (Vercel → Settings → Environment Variables, o `$env:GROQ_API_KEY` en local) y **nunca** se sube al
+> repositorio ni llega al navegador. Sin clave o ante fallos, el chat vuelve al matcher local de
+> preguntas rápidas (respuestas de la base de conocimiento), por lo que nunca se rompe.
+
 ## ⚙️ Backend
 
 El backend live se encuentra en `backend/` y es un proyecto **PHP 8 orientado a objetos**
