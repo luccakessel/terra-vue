@@ -12,6 +12,7 @@ import { MessageCircle, Send, X } from "lucide-react";
 import { responderChatIA, type MensajeChat } from "@/server/chatIA";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 interface Mensaje {
@@ -148,9 +149,12 @@ const respuestaGenerica =
   "Todavía no tengo información sobre ese tema. Podés consultarme sobre la cantidad de invernaderos, la configuración de alertas, los rangos ideales de temperatura y humedad, el riego, o el estado general del sistema.";
 
 export function ChatWidget() {
+  const { autenticado } = useAuth();
+
   const identidad = useRef(1);
   const [abierto, setAbierto] = useState(false);
   const [mensajes, setMensajes] = useState<Mensaje[]>([saludo]);
+  const [preguntasVisibles, setPreguntasVisibles] = useState(true);
   const [borrador, setBorrador] = useState("");
 
   function nuevoMensaje(texto: string, propio: boolean): Mensaje {
@@ -181,6 +185,7 @@ export function ChatWidget() {
     const usuario = nuevoMensaje(consulta, true);
     const pendiente = nuevoMensaje("Escribiendo…", false);
     setMensajes((previos) => [...previos, usuario, pendiente]);
+    setPreguntasVisibles(false);
 
     void responderChatIA({ data: { pregunta: consulta, historial } })
       .then((resultado) => {
@@ -199,6 +204,9 @@ export function ChatWidget() {
     responder(texto);
     setBorrador("");
   }
+
+  // Solo disponible dentro del sistema, tras iniciar sesión.
+  if (!autenticado) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
@@ -224,7 +232,7 @@ export function ChatWidget() {
           </header>
 
           <div className="flex-1 space-y-3 overflow-y-auto p-4">
-            {mensajes.length === 1 && (
+            {preguntasVisibles && (
               <div className="space-y-2">
                 {preguntasRapidas.map((pregunta) => (
                   <Button
@@ -241,16 +249,27 @@ export function ChatWidget() {
             )}
 
             {mensajes.map((mensaje) => (
-              <div
-                key={mensaje.id}
-                className={cn(
-                  "max-w-[85%] rounded-xl px-3 py-2 text-sm",
-                  mensaje.propio
-                    ? "ml-auto whitespace-pre-line bg-primary text-primary-foreground"
-                    : "whitespace-pre-line bg-secondary/60 text-foreground",
+              <div key={mensaje.id} className={cn("space-y-2", mensaje.propio && "ml-auto")}>
+                <div
+                  className={cn(
+                    "max-w-[85%] rounded-xl px-3 py-2 text-sm",
+                    mensaje.propio
+                      ? "ml-auto whitespace-pre-line bg-primary text-primary-foreground"
+                      : "whitespace-pre-line bg-secondary/60 text-foreground",
+                  )}
+                >
+                  {mensaje.texto}
+                </div>
+                {!mensaje.propio && !preguntasVisibles && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto rounded-full px-3 py-1 text-xs font-medium text-muted-foreground underline-offset-4 hover:bg-secondary/50 hover:text-foreground hover:underline"
+                    onClick={() => setPreguntasVisibles(true)}
+                  >
+                    ¿Seguís teniendo dudas? Volver a las preguntas rápidas
+                  </Button>
                 )}
-              >
-                {mensaje.texto}
               </div>
             ))}
           </div>
